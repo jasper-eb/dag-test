@@ -17,7 +17,7 @@ etl_2_parameters = {
 dag = DAG(
     "notebook-etl",
     description="Demo of presto ETL run through a notebook",
-    default_args=default_args
+    default_args=default_args,
 )
 
 etl_1 = PapermillOperator(
@@ -25,6 +25,7 @@ etl_1 = PapermillOperator(
     input_nb="notebooks/jasper/demo/etl.ipynb",
     output_nb="/tmp/etl-output.ipynb",
     parameters=etl_1_parameters,
+    dag=dag,
 )
 
 etl_2 = PapermillOperator(
@@ -33,6 +34,7 @@ etl_2 = PapermillOperator(
     # output_nb="s3://eb-df-prod-jupyter-data/jasper/demo/output_nb.ipynb",
     output_nb="/tmp/analysis-output.ipynb",
     parameters=etl_2_parameters,
+    dag=dag,
 )
 
-etl_1 >> etl_2
+etl_1 >> [etl_2]
