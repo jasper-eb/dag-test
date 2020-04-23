@@ -15,19 +15,19 @@ etl_2_parameters = {
 }
 
 dag = DAG(
-    "Notebook Demo",
+    "notebook-etl",
     description="Demo of presto ETL run through a notebook",
     default_args=default_args
 )
 
 etl_1 = PapermillOperator(
-    task_id="Demo ETL 1",
+    task_id="presto-etl",
     input_nb="notebooks/jasper/demo/etl.ipynb",
     parameters=etl_1_parameters,
 )
 
 etl_2 = PapermillOperator(
-    task_id="Demo ETL 2",
+    task_id="pandas-render",
     input_nb="notebooks/jasper/demo/analysis.ipynb",
     output_nb="s3://eb-df-prod-jupyter-data/jasper/demo/output_nb.ipynb",
     parameters=etl_2_parameters,
