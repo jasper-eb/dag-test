@@ -1,9 +1,15 @@
 from airflow import DAG
 from airflow.operators.papermill_operator import PapermillOperator
 
+from datetime import datetime, timedelta
+
 default_args = {
     "owner": "jasper",
     "depends_on_past": False,
+    "start_date": datetime(2020, 4, 23, 10),
+    "retries": 3,
+    "retry_delay": timedelta(minutes=2),
+    'schedule_interval': '@daily',
 }
 
 etl_1_parameters = {
