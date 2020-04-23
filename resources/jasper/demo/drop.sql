@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS hive.team_data_foundry.data_science_airflow_demo

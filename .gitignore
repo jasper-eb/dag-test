@@ -19,4 +19,4 @@ wheels/
 .installed.cfg
 *.egg
 venv/
-
+*.ipynb_checkpoints/
