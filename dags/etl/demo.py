@@ -23,13 +23,15 @@ dag = DAG(
 etl_1 = PapermillOperator(
     task_id="presto-etl",
     input_nb="notebooks/jasper/demo/etl.ipynb",
+    output_nb="/tmp/etl-output.ipynb",
     parameters=etl_1_parameters,
 )
 
 etl_2 = PapermillOperator(
     task_id="pandas-render",
     input_nb="notebooks/jasper/demo/analysis.ipynb",
-    output_nb="s3://eb-df-prod-jupyter-data/jasper/demo/output_nb.ipynb",
+    # output_nb="s3://eb-df-prod-jupyter-data/jasper/demo/output_nb.ipynb",
+    output_nb="/tmp/analysis-output.ipynb",
     parameters=etl_2_parameters,
 )
 
