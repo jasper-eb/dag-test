@@ -13,7 +13,7 @@ default_args = {
 }
 
 etl_1_parameters = {
-    "date": "2020-04-23"
+    "date": datetime.now() - timedelta(days=1)
 }
 
 etl_2_parameters = {
