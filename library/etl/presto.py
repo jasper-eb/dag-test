@@ -69,6 +69,6 @@ class PrestoETLClient(PrestoClient):
         return template.render(**context)
 
     def run(self):
-        for query, parameters in self.queries_dict.items():
-            templated_query = self._template_query(query, parameters or {})
+        for query, parameters in self.queries_dict.iteritems():
+            templated_query = self._template_query(query, parameters)
             self.transaction(templated_query)
