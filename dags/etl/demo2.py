@@ -20,7 +20,7 @@ etl_1_kwargs = {
             "query": "resources/jasper/demo/drop.sql"
         },
         {
-            "query": "resources/jasper/demo/ctas",
+            "query": "resources/jasper/demo/ctas.sql",
             "parameters": {
                 "date": datetime.today() - timedelta(days=1)
             }
