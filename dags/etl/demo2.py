@@ -1,6 +1,8 @@
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 
+import pandas as pd
+
 from datetime import datetime, timedelta
 
 from library.etl.presto import PrestoETLClient
@@ -16,20 +18,15 @@ default_args = {
 
 etl_1_parameters = [
     {
-        "query": "resources/jasper/demo/drop.sql"
+        "query": "../../resources/jasper/demo/drop.sql"
     },
     {
-        "query": "resources/jasper/demo/ctas.sql",
+        "query": "../../resources/jasper/demo/ctas.sql",
         "parameters": {
             "date": datetime.today() - timedelta(days=1)
         }
     }
 ]
-
-
-etl_2_kwargs = {
-    "query": "../../../resources/jasper/demo/query.sql"
-}
 
 dag = DAG(
     "python-etl",
@@ -43,3 +40,6 @@ etl_1 = PythonOperator(
     python_callable=presto_etl.run(),
     dag=dag
 )
+
+def write_to_s3():
+    presto_etl.select("SELECT")
