@@ -65,10 +65,12 @@ class PrestoETLClient(PrestoClient):
 
     def _template_query(self, file_path, context={}):
         lines = '\n'.join(open(file_path, 'r').readlines())
-        template = Template(lines)
-        return template.render(**context)
+        if context:
+            template = Template(lines)
+            return template.render(**context)
+        return lines
 
     def run(self):
-        for query, parameters in self.queries_dict.iteritems():
-            templated_query = self._template_query(query, parameters)
+        for q in self.queries_dict:
+            templated_query = self._template_query(q.get('query'), q.get('parameters', {}))
             self.transaction(templated_query)
