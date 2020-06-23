@@ -2,8 +2,8 @@
 
 set -e
 
-KERNEL_DIR=second
-KERNEL_NAME="Second Kernel"
+KERNEL_DIR=main
+KERNEL_NAME="Main Kernel"
 
 WORKING_DIR="$(pwd)/$KERNEL_DIR"
 mkdir -p $WORKING_DIR
