@@ -14,11 +14,16 @@ bash $WORKING_DIR/miniconda.sh -b -u -p $WORKING_DIR/miniconda
 
 # Install your dependencies here
 source $WORKING_DIR/miniconda/bin/activate
-pip install presto-client pytorch
+pip install presto-client torch
 
 # Register kernel
 pip install ipykernel
+
+sudo -u ec2-user -i <<'EOF'
+KERNEL_DIR=$(cat /some/file)
+KERNEL_NAME=$(cat /some/file)
 python -m ipykernel install --user --name $KERNEL_DIR --display-name "$KERNEL_NAME"
+EOF
 
 # Cleanup
 source $WORKING_DIR/miniconda/bin/deactivate
