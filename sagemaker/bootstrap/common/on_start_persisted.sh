@@ -14,16 +14,17 @@ BOOTSTRAP_REPO=https://github.com/jasper-eb/$BOOTSTRAP_REPO_NAME.git
 BOOTSTRAP_REPO_RESOURCES_DIR=sagemaker/bootstrap
 
 USER_KERNEL_DIRECTORY=/home/ec2-user/SageMaker/efs/$SAGEMAKER_USER/kernels
-REQUIREMENTS_DIR=$BOOTSTRAP_REPO_NAME/$BOOTSTRAP_REPO_RESOURCES_DIR/$SAGEMAKER_USER
+REQUIREMENTS_DIR=$BOOTSTRAP_STAGING_DIR/$BOOTSTRAP_REPO_NAME/$BOOTSTRAP_REPO_RESOURCES_DIR/$SAGEMAKER_USER
 
-mkdir $BOOTSTRAP_STAGING_DIR
+mkdir -p $BOOTSTRAP_STAGING_DIR
 cd $BOOTSTRAP_STAGING_DIR
 
 echo "$GITHUB_USER\n$GITHUB_TOKEN" | git clone $BOOTSTRAP_REPO
+cd $REQUIREMENTS_DIR
 
-for REQUIREMENTS in $REQUIREMENTS_DIR/*_requirements.txt; do
-    KERNEL_DIR=$USER_KERNEL_DIRECTORY/$KERNEL_NAME
+for REQUIREMENTS in *_requirements.txt; do
     KERNEL_NAME=$(echo $REQUIREMENTS | sed 's/\_requirements.txt//g')
+    KERNEL_DIR=$USER_KERNEL_DIRECTORY/$KERNEL_NAME
     REQUIREMENTS_FILE=$REQUIREMENTS_DIR/$REQUIREMENTS
 
     echo "$(date -Iseconds) Boostrapping $KERNEL_NAME from file $REQUIREMENTS"
@@ -40,11 +41,12 @@ for REQUIREMENTS in $REQUIREMENTS_DIR/*_requirements.txt; do
     fi
 
     echo "$(date -Iseconds) Installing/updating requirements"
-    source $$KERNEL_DIR/miniconda/bin/activate
-    pip install -r $REQUIREMENTS_FILE
+    source $KERNEL_DIR/miniconda/bin/activate
+    pip install ipykernel
+    pip install -q -r $REQUIREMENTS_FILE
 
     echo "$(date -Iseconds) Registering kernel"
-    python -m ipykernel install --user --name $KERNEL_DIR --display-name "$KERNEL_NAME"
+    python -m ipykernel install --user --name $KERNEL_NAME --display-name "$KERNEL_NAME"
 
     conda deactivate
     echo "$(date -Iseconds) Kernel $KERNEL_NAME done"
