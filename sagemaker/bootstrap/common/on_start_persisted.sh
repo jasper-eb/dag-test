@@ -1,5 +1,9 @@
 #!/bin/bash
 
+function loginfo {
+    echo "$(date -Iseconds) $1"
+}
+
 set -e
 
 NOTEBOOK_ARN=$(jq '.ResourceArn' /opt/ml/metadata/resource-metadata.json --raw-output)
@@ -27,9 +31,9 @@ for REQUIREMENTS in *_requirements.txt; do
     KERNEL_DIR=$USER_KERNEL_DIRECTORY/$KERNEL_NAME
     REQUIREMENTS_FILE=$REQUIREMENTS_DIR/$REQUIREMENTS
 
-    echo "$(date -Iseconds) Boostrapping $KERNEL_NAME from file $REQUIREMENTS"
+    loginfo "Boostrapping $KERNEL_NAME from file $REQUIREMENTS"
     if [[ ! -d $KERNEL_DIR ]]; then
-        echo "$(date -Iseconds) Kernel does not exist in user directory, creating it"
+        loginfo "Kernel does not exist in user directory, creating it"
         mkdir -p $KERNEL_DIR
         cd $KERNEL_DIR
 
@@ -40,16 +44,18 @@ for REQUIREMENTS in *_requirements.txt; do
         rm -rf $$KERNEL_DIR/miniconda.sh
     fi
 
-    echo "$(date -Iseconds) Installing/updating requirements"
+    loginfo "Installing/updating requirements"
     source $KERNEL_DIR/miniconda/bin/activate
-    pip install ipykernel
-    pip install -q -r $REQUIREMENTS_FILE
+    pip install -q ipykernel
+    pip install -q -r $REQUIREMENTS_FILE # nohup this, make sure environemnt carries over
 
-    echo "$(date -Iseconds) Registering kernel"
+    loginfo "Registering kernel"
     python -m ipykernel install --user --name $KERNEL_NAME --display-name "$KERNEL_NAME"
-
+    # Symlink to kernelspec path?
     conda deactivate
-    echo "$(date -Iseconds) Kernel $KERNEL_NAME done"
+    loginfo "Kernel $KERNEL_NAME done"
 done
 
-echo "$(date -Iseconds) Bootstrapping complete"
+loginfo "Bootstrapping complete"
+
+/home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/python -m ipykernel install --prefix=/home/ec2-user/SageMaker/efs/jasper/kernels/jasper/miniconda --name 'test_jasper'
