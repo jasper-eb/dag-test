@@ -4,6 +4,16 @@ function loginfo {
     echo "$(date -Iseconds) $1"
 }
 
+
+function install_environment {
+    source activate $KERNEL_DIR
+    pip install -q -r $REQUIREMENTS_FILE # nohup this, make sure environemnt carries over
+
+    loginfo "Registering kernel"
+    # Symlink to kernelspec path?
+    conda deactivate
+}
+
 set -e
 
 NOTEBOOK_ARN=$(jq '.ResourceArn' /opt/ml/metadata/resource-metadata.json --raw-output)
@@ -23,39 +33,39 @@ REQUIREMENTS_DIR=$BOOTSTRAP_STAGING_DIR/$BOOTSTRAP_REPO_NAME/$BOOTSTRAP_REPO_RES
 mkdir -p $BOOTSTRAP_STAGING_DIR
 cd $BOOTSTRAP_STAGING_DIR
 
-echo "$GITHUB_USER\n$GITHUB_TOKEN" | git clone $BOOTSTRAP_REPO
+if [[ ! -d $BOOTSTRAP_STAGING_DIR/$BOOTSTRAP_REPO_NAME ]]; then
+    echo "$GITHUB_USER\n$GITHUB_TOKEN" | git clone $BOOTSTRAP_REPO
+else
+    cd $BOOTSTRAP_STAGING_DIR/$BOOTSTRAP_REPO_NAME
+    git pull
+fi
+
 cd $REQUIREMENTS_DIR
 
 for REQUIREMENTS in *_requirements.txt; do
     KERNEL_NAME=$(echo $REQUIREMENTS | sed 's/\_requirements.txt//g')
     KERNEL_DIR=$USER_KERNEL_DIRECTORY/$KERNEL_NAME
     REQUIREMENTS_FILE=$REQUIREMENTS_DIR/$REQUIREMENTS
+    EXISTING_ENVIRONMENT=true
 
     loginfo "Boostrapping $KERNEL_NAME from file $REQUIREMENTS"
     if [[ ! -d $KERNEL_DIR ]]; then
+        EXISTING_ENVIRONMENT=false
         loginfo "Kernel does not exist in user directory, creating it"
         mkdir -p $KERNEL_DIR
         cd $KERNEL_DIR
-
-        wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O "$KERNEL_DIR/miniconda.sh"
-        chmod +x $KERNEL_DIR/miniconda.sh
-        bash $KERNEL_DIR/miniconda.sh -b -u -p $KERNEL_DIR/miniconda
-
-        rm -rf $$KERNEL_DIR/miniconda.sh
+        conda create --prefix $KERNEL_DIR python=3.7 ipykernel -y
     fi
 
     loginfo "Installing/updating requirements"
-    source $KERNEL_DIR/miniconda/bin/activate
-    pip install -q ipykernel
-    pip install -q -r $REQUIREMENTS_FILE # nohup this, make sure environemnt carries over
+    source activate $KERNEL_DIR
+    pip install -q -r $REQUIREMENTS_FILE
 
     loginfo "Registering kernel"
-    python -m ipykernel install --user --name $KERNEL_NAME --display-name "$KERNEL_NAME"
     # Symlink to kernelspec path?
     conda deactivate
+    echo $KERNEL_DIR >> /home/ec2-user/.conda/environments.txt
     loginfo "Kernel $KERNEL_NAME done"
 done
 
 loginfo "Bootstrapping complete"
-
-/home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/python -m ipykernel install --prefix=/home/ec2-user/SageMaker/efs/jasper/kernels/jasper/miniconda --name 'test_jasper'
