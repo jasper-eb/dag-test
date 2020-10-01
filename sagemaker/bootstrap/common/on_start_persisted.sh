@@ -58,12 +58,7 @@ for REQUIREMENTS in *_requirements.txt; do
     fi
 
     loginfo "Installing/updating requirements"
-    source activate $KERNEL_DIR
-    pip install -q -r $REQUIREMENTS_FILE
-
-    loginfo "Registering kernel"
-    # Symlink to kernelspec path?
-    conda deactivate
+    nohup install_environment
     echo $KERNEL_DIR >> /home/ec2-user/.conda/environments.txt
     loginfo "Kernel $KERNEL_NAME done"
 done
