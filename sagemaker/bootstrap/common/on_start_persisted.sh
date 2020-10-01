@@ -59,6 +59,7 @@ for REQUIREMENTS in *_requirements.txt; do
 
     loginfo "Installing/updating requirements"
     nohup install_environment
+    loginfo "Appending $KERNEL_DIR to /home/ec2-user/.conda/environments.txt"
     echo $KERNEL_DIR >> /home/ec2-user/.conda/environments.txt
     loginfo "Kernel $KERNEL_NAME done"
 done
